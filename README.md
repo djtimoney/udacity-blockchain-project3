@@ -15,5 +15,5 @@ The following activity diagram illustrates the movement of coffee through these 
 The following sequence diagram shows the contract invocations by these actors:
 ![sequence diagram](images/sequence.jpg)
 
-The following class diagram shows more clearly the contract invocations, as well as the prerequisites for each:
-![class diagram](images/class.jpg)
+The following state diagram shows more clearly the contract invocations, as well as the prerequisites for each:
+![state diagram](images/state.jpg)
