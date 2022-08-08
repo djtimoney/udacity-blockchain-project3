@@ -92,49 +92,41 @@ contract SupplyChain {
   // Define a modifier that checks if an item.state of a upc is Harvested
   modifier harvested(uint _upc) {
     require(items[_upc].itemState == State.Harvested);
-    _;
   }
 
   // Define a modifier that checks if an item.state of a upc is Processed
   modifier processed(uint _upc) {
     require(items[_upc].itemState == State.Processed);
-    _;
   }
   
   // Define a modifier that checks if an item.state of a upc is Packed
   modifier packed(uint _upc) {
     require(items[_upc].itemState == State.Packed);
-    _;
   }
 
   // Define a modifier that checks if an item.state of a upc is ForSale
   modifier forSale(uint _upc) {
     require(items[_upc].itemState == State.ForSale);
-    _;
   }
 
   // Define a modifier that checks if an item.state of a upc is Sold
   modifier sold(uint _upc) {
     require(items[_upc].itemState == State.Sold);
-    _;
   }
   
   // Define a modifier that checks if an item.state of a upc is Shipped
   modifier shipped(uint _upc) {
     require(items[_upc].itemState == State.Shipped);
-    _;
   }
 
   // Define a modifier that checks if an item.state of a upc is Received
   modifier received(uint _upc) {
     require(items[_upc].itemState == State.Received);
-    _;
   }
 
   // Define a modifier that checks if an item.state of a upc is Purchased
   modifier purchased(uint _upc) {
     require(items[_upc].itemState == State.Purchased);
-    _;
   }
 
   // In the constructor set 'owner' to the address that instantiated the contract
@@ -180,11 +172,11 @@ contract SupplyChain {
   }
 
   // Define a function 'processtItem' that allows a farmer to mark an item 'Processed'
-  function processItem(uint _upc) public harvested(_upc) verifyCaller(items[_upc].originFarmerID)
+  function processItem(uint _upc) public 
   // Call modifier to check if upc has passed previous supply chain stage
-  
+  harvested(_upc) 
   // Call modifier to verify caller of this function
-  
+  verifyCaller(items[_upc].originFarmerID)
   {
     // Update the appropriate fields
     items[_upc].itemState = State.Processed;
