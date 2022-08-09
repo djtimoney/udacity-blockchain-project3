@@ -12,7 +12,7 @@ contract DistributorRole {
   event DistributorRemoved(address indexed account);
 
   // Define a struct 'distributors' by inheriting from 'Roles' library, struct Role
-  Roles.role private distributors;
+  Roles.Role private distributors;
 
   // In the constructor make the address that deploys this contract the 1st distributor
   constructor() public {
@@ -22,6 +22,7 @@ contract DistributorRole {
   // Define a modifier that checks to see if msg.sender has the appropriate role
   modifier onlyDistributor() {
     require(isDistributor(msg.sender));
+    _;
   }
 
   // Define a function 'isDistributor' to check this role
