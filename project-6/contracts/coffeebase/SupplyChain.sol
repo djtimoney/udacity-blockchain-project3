@@ -1,10 +1,16 @@
 pragma solidity ^0.4.24;
 
+import "../coffeecore/Ownable.sol";
+import "../coffeeaccesscontrol/ConsumerRole.sol";
+import "../coffeeaccesscontrol/DistributorRole.sol";
+import "../coffeeaccesscontrol/FarmerRole.sol";
+import "../coffeeaccesscontrol/RetailerRole.sol";
 
 // Define a contract 'Supplychain'
 contract SupplyChain is Ownable {
     // Define 'owner'
-    address owner;
+    // Don't need this - use Ownable
+    // address owner;
 
     // Define a variable called 'upc' for Universal Product Code (UPC)
     uint256 upc;
@@ -62,11 +68,12 @@ contract SupplyChain is Ownable {
     event Received(uint256 upc);
     event Purchased(uint256 upc);
 
+    // Don't need this - use Ownable
     // Define a modifer that checks to see if msg.sender == owner of the contract
-    modifier onlyOwner() {
-      require(msg.sender == owner);
-      _;
-    }
+    // modifier onlyOwner() {
+    //  require(msg.sender == owner());
+    //  _;
+    // }
 
     // Define a modifer that verifies the Caller
     modifier verifyCaller(address _address) {
@@ -141,15 +148,16 @@ contract SupplyChain is Ownable {
     // and set 'sku' to 1
     // and set 'upc' to 1
     constructor() public payable {
-        owner = msg.sender;
+        // Ownable already does below
+        // owner = msg.sender;
         sku = 1;
         upc = 1;
     }
 
     // Define a function 'kill' if required
     function kill() public {
-        if (msg.sender == owner) {
-            selfdestruct(owner);
+        if (msg.sender == owner()) {
+            selfdestruct(owner());
         }
     }
 
