@@ -68,6 +68,12 @@ contract SupplyChain is Ownable {
     event Received(uint256 upc);
     event Purchased(uint256 upc);
 
+    // Roles
+    FarmerRole farmers = new FarmerRole();
+    DistributorRole distributors = new DistributorRole();
+    RetailerRole retailers = new RetailerRole();
+    ConsumerRole consumers = new ConsumerRole();
+
     // Don't need this - use Ownable
     // Define a modifer that checks to see if msg.sender == owner of the contract
     // modifier onlyOwner() {
@@ -161,6 +167,23 @@ contract SupplyChain is Ownable {
         }
     }
 
+    // Add roles
+    function addFarmer(address _farmerID) {
+        farmers.addFarmer(_farmerID);
+    }
+
+    function addDistributor(address _distributorID) {
+        distributors.addDistributor(_distributorID);
+    }
+
+    function addRetailer(address _retailerID) {
+        retailers.addRetailer(_retailerID);
+    }
+
+    function addConsumer(address _consumerID) {
+        consumers.addConsumer(_consumerID);
+    }
+
     // Define a function 'harvestItem' that allows a farmer to mark an item 'Harvested'
     function harvestItem(
         uint256 _upc,
@@ -170,7 +193,9 @@ contract SupplyChain is Ownable {
         string _originFarmLatitude,
         string _originFarmLongitude,
         string _productNotes
-    ) public {
+    ) public 
+    farmers.onlyFarmer()
+    {
         // Add the new item as part of Harvest
         Item memory item = Item(
             sku,
@@ -205,6 +230,8 @@ contract SupplyChain is Ownable {
         harvested(_upc)
         // Call modifier to verify caller of this function
         verifyCaller(items[_upc].originFarmerID)
+        // Call modifier to verify caller is a farmer 
+        farmers.onlyFarmer()
     {
         // Update the appropriate fields
         items[_upc].itemState = State.Processed;
@@ -220,6 +247,8 @@ contract SupplyChain is Ownable {
         processed(_upc)
     // Call modifier to verify caller of this function
         verifyCaller(items[_upc].originFarmerID)
+    // Call modifier to verify caller is a farmer
+        farmers.onlyFarmer()
     {
         // Update the appropriate fields
         items[_upc].itemState = State.Packed;
@@ -235,6 +264,9 @@ contract SupplyChain is Ownable {
         packed(_upc)
     // Call modifier to verify caller of this function
         verifyCaller(items[_upc].originFarmerID)
+    // Call modifier to verify caller is a farmer 
+        farmers.onlyFarmer()
+
     {
         // Update the appropriate fields
         items[_upc].productPrice = _price;
@@ -256,6 +288,8 @@ contract SupplyChain is Ownable {
         paidEnough(items[_upc].productPrice)
     // Call modifer to send any excess ether back to buyer
         checkValue(_upc)
+    // Verify caller is a distributor 
+        distributors.onlyDistributor()
     {
         // Update the appropriate fields - ownerID, distributorID, itemState
         items[_upc].ownerID = msg.sender;
@@ -277,6 +311,8 @@ contract SupplyChain is Ownable {
         purchased(_upc)
     // Call modifier to verify caller of this function
         verifyCaller(items[_upc].distributorID)
+    // Verify caller is a distributor
+        distributors.onlyDistributor()
     {
         // Update the appropriate fields
         items[_upc].itemState = State.Shipped;
@@ -292,9 +328,15 @@ contract SupplyChain is Ownable {
     // Call modifier to check if upc has passed previous supply chain stage
         shipped(_upc)
     // Access Control List enforced by calling Smart Contract / DApp
+        retailers.onlyRetailer()
     {
         // Update the appropriate fields - ownerID, retailerID, itemState
+        items[_upc].ownerID = msg.sender;
+        items[_upc].retailerID = msg.sender;
+        items[_upc].itemState = State.Received;
+
         // Emit the appropriate event
+        emit Received(_upc);
     }
 
     // Define a function 'purchaseItem' that allows the consumer to mark an item 'Purchased'
@@ -302,11 +344,18 @@ contract SupplyChain is Ownable {
     function purchaseItem(uint256 _upc)
         public
     // Call modifier to check if upc has passed previous supply chain stage
+        received(_upc)
 
     // Access Control List enforced by calling Smart Contract / DApp
+        consumers.onlyConsumer()
     {
         // Update the appropriate fields - ownerID, consumerID, itemState
+        items[_upc].ownerID = msg.sender;
+        items[_upc].consumerID = msg.sender;
+        items[_upc].itemState = State.Purchased;
+
         // Emit the appropriate event
+        emit Purchased(_upc);
     }
 
     // Define a function 'fetchItemBufferOne' that fetches the data
@@ -327,14 +376,14 @@ contract SupplyChain is Ownable {
         // Assign values to the 8 parameters
 
         return (
-            itemSKU,
-            itemUPC,
-            ownerID,
-            originFarmerID,
-            originFarmName,
-            originFarmInformation,
-            originFarmLatitude,
-            originFarmLongitude
+            items[_upc].itemSKU,
+            items[_upc].itemUPC,
+            items[_upc].ownerID,
+            items[_upc].originFarmerID,
+            items[_upc].originFarmName,
+            items[_upc].originFarmInformation,
+            items[_upc].originFarmLatitude,
+            items[_upc].originFarmLongitude
         );
     }
 
@@ -357,15 +406,17 @@ contract SupplyChain is Ownable {
         // Assign values to the 9 parameters
 
         return (
-            itemSKU,
-            itemUPC,
-            productID,
-            productNotes,
-            productPrice,
-            itemState,
-            distributorID,
-            retailerID,
-            consumerID
+            items[_upc].itemSKU,
+            items[_upc].itemUPC,
+            items[_upc].productID,
+            items[_upc].productNotes,
+            items[_upc].productPrice,
+            items[_upc].itemState,
+            items[_upc].distributorID,
+            items[_upc].retailerID,
+            items[_upc].consumerID
         );
     }
+
+
 }
