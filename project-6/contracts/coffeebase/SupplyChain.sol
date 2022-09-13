@@ -83,13 +83,13 @@ contract SupplyChain is Ownable {
 
     // Define a modifer that verifies the Caller
     modifier verifyCaller(address _address) {
-        require(msg.sender == _address);
+        require(msg.sender == _address, "Invalid caller");
         _;
     }
 
     // Define a modifier that checks if the paid amount is sufficient to cover the price
     modifier paidEnough(uint256 _price) {
-        require(msg.value >= _price);
+        require(msg.value >= _price, "Price too low");
         _;
     }
 
@@ -104,49 +104,70 @@ contract SupplyChain is Ownable {
 
     // Define a modifier that checks if an item.state of a upc is Harvested
     modifier harvested(uint256 _upc) {
-        require(items[_upc].itemState == State.Harvested);
+        require(items[_upc].itemState == State.Harvested, "Item state is not Harvested");
         _;
     }
 
     // Define a modifier that checks if an item.state of a upc is Processed
     modifier processed(uint256 _upc) {
-        require(items[_upc].itemState == State.Processed);
+        require(items[_upc].itemState == State.Processed, "Item state is not Processed");
         _;
     }
 
     // Define a modifier that checks if an item.state of a upc is Packed
     modifier packed(uint256 _upc) {
-        require(items[_upc].itemState == State.Packed);
+        require(items[_upc].itemState == State.Packed, "Item state is not Packed");
         _;
     }
 
     // Define a modifier that checks if an item.state of a upc is ForSale
     modifier forSale(uint256 _upc) {
-        require(items[_upc].itemState == State.ForSale);
+        require(items[_upc].itemState == State.ForSale, "Item state is not ForSale");
         _;
     }
 
     // Define a modifier that checks if an item.state of a upc is Sold
     modifier sold(uint256 _upc) {
-        require(items[_upc].itemState == State.Sold);
+        require(items[_upc].itemState == State.Sold, "Item state is not Sold");
         _;
     }
 
     // Define a modifier that checks if an item.state of a upc is Shipped
     modifier shipped(uint256 _upc) {
-        require(items[_upc].itemState == State.Shipped);
+        require(items[_upc].itemState == State.Shipped, "Item state is not Shipped");
         _;
     }
 
     // Define a modifier that checks if an item.state of a upc is Received
     modifier received(uint256 _upc) {
-        require(items[_upc].itemState == State.Received);
+        require(items[_upc].itemState == State.Received, "Item state is not Received");
         _;
     }
 
     // Define a modifier that checks if an item.state of a upc is Purchased
     modifier purchased(uint256 _upc) {
-        require(items[_upc].itemState == State.Purchased);
+        require(items[_upc].itemState == State.Purchased, "Item state is not Purchased");
+        _;
+    }
+
+    // Define modifiers for access control
+    modifier onlyFarmer() {
+        require(farmers.isFarmer(msg.sender), "Message sender is not a farmer");
+        _;
+    }
+
+    modifier onlyDistributor() {
+        require(distributors.isDistributor(msg.sender), "Message sender is not a distributor");
+        _;
+    }
+
+    modifier onlyRetailer() {
+        require(retailers.isRetailer(msg.sender), "Message sender is not a retailer");
+        _;
+    }
+
+    modifier onlyConsumer() {
+        require(consumers.isConsumer(msg.sender), "Message sender is not a consumer");
         _;
     }
 
@@ -168,19 +189,27 @@ contract SupplyChain is Ownable {
     }
 
     // Add roles
-    function addFarmer(address _farmerID) {
+    function addFarmer(address _farmerID) public 
+    onlyOwner()
+    {
         farmers.addFarmer(_farmerID);
     }
 
-    function addDistributor(address _distributorID) {
+    function addDistributor(address _distributorID) public 
+    onlyOwner()
+    {
         distributors.addDistributor(_distributorID);
     }
 
-    function addRetailer(address _retailerID) {
+    function addRetailer(address _retailerID) public 
+    onlyOwner()
+    {
         retailers.addRetailer(_retailerID);
     }
 
-    function addConsumer(address _consumerID) {
+    function addConsumer(address _consumerID) public 
+    onlyOwner()
+    {
         consumers.addConsumer(_consumerID);
     }
 
@@ -194,7 +223,7 @@ contract SupplyChain is Ownable {
         string _originFarmLongitude,
         string _productNotes
     ) public 
-    farmers.onlyFarmer()
+    onlyFarmer()
     {
         // Add the new item as part of Harvest
         Item memory item = Item(
@@ -231,7 +260,7 @@ contract SupplyChain is Ownable {
         // Call modifier to verify caller of this function
         verifyCaller(items[_upc].originFarmerID)
         // Call modifier to verify caller is a farmer 
-        farmers.onlyFarmer()
+        onlyFarmer()
     {
         // Update the appropriate fields
         items[_upc].itemState = State.Processed;
@@ -248,7 +277,7 @@ contract SupplyChain is Ownable {
     // Call modifier to verify caller of this function
         verifyCaller(items[_upc].originFarmerID)
     // Call modifier to verify caller is a farmer
-        farmers.onlyFarmer()
+        onlyFarmer()
     {
         // Update the appropriate fields
         items[_upc].itemState = State.Packed;
@@ -265,7 +294,7 @@ contract SupplyChain is Ownable {
     // Call modifier to verify caller of this function
         verifyCaller(items[_upc].originFarmerID)
     // Call modifier to verify caller is a farmer 
-        farmers.onlyFarmer()
+        onlyFarmer()
 
     {
         // Update the appropriate fields
@@ -289,7 +318,7 @@ contract SupplyChain is Ownable {
     // Call modifer to send any excess ether back to buyer
         checkValue(_upc)
     // Verify caller is a distributor 
-        distributors.onlyDistributor()
+        onlyDistributor()
     {
         // Update the appropriate fields - ownerID, distributorID, itemState
         items[_upc].ownerID = msg.sender;
@@ -312,7 +341,7 @@ contract SupplyChain is Ownable {
     // Call modifier to verify caller of this function
         verifyCaller(items[_upc].distributorID)
     // Verify caller is a distributor
-        distributors.onlyDistributor()
+        onlyDistributor()
     {
         // Update the appropriate fields
         items[_upc].itemState = State.Shipped;
@@ -328,7 +357,7 @@ contract SupplyChain is Ownable {
     // Call modifier to check if upc has passed previous supply chain stage
         shipped(_upc)
     // Access Control List enforced by calling Smart Contract / DApp
-        retailers.onlyRetailer()
+        onlyRetailer()
     {
         // Update the appropriate fields - ownerID, retailerID, itemState
         items[_upc].ownerID = msg.sender;
@@ -347,7 +376,7 @@ contract SupplyChain is Ownable {
         received(_upc)
 
     // Access Control List enforced by calling Smart Contract / DApp
-        consumers.onlyConsumer()
+        onlyConsumer()
     {
         // Update the appropriate fields - ownerID, consumerID, itemState
         items[_upc].ownerID = msg.sender;
@@ -374,16 +403,16 @@ contract SupplyChain is Ownable {
         )
     {
         // Assign values to the 8 parameters
-
+        Item storage item = items[_upc];
         return (
-            items[_upc].itemSKU,
-            items[_upc].itemUPC,
-            items[_upc].ownerID,
-            items[_upc].originFarmerID,
-            items[_upc].originFarmName,
-            items[_upc].originFarmInformation,
-            items[_upc].originFarmLatitude,
-            items[_upc].originFarmLongitude
+            item.sku,
+            item.upc,
+            item.ownerID,
+            item.originFarmerID,
+            item.originFarmName,
+            item.originFarmInformation,
+            item.originFarmLatitude,
+            item.originFarmLongitude
         );
     }
 
@@ -404,17 +433,18 @@ contract SupplyChain is Ownable {
         )
     {
         // Assign values to the 9 parameters
+        Item storage item = items[_upc];
 
         return (
-            items[_upc].itemSKU,
-            items[_upc].itemUPC,
-            items[_upc].productID,
-            items[_upc].productNotes,
-            items[_upc].productPrice,
-            items[_upc].itemState,
-            items[_upc].distributorID,
-            items[_upc].retailerID,
-            items[_upc].consumerID
+            item.sku,
+            item.upc,
+            item.productID,
+            item.productNotes,
+            item.productPrice,
+            uint256(item.itemState),
+            item.distributorID,
+            item.retailerID,
+            item.consumerID
         );
     }
 
