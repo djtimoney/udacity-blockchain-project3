@@ -20,3 +20,6 @@ The following sequence diagram shows the contract invocations by these actors:
 The following state diagram shows more clearly the contract invocations, as well as the prerequisites for each:
 
 ![state diagram](images/state.jpg)
+
+This project is deployed to the Rinkeby test network - see it
+on Etherscan here : https://etherscan.io/address/0xafdfced7d4cb62a9a627c5ab6adaf99b40cd6bed
