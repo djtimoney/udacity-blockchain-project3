@@ -68,6 +68,8 @@ contract SupplyChain is Ownable {
     event Received(uint256 upc);
     event Purchased(uint256 upc);
 
+ 
+
     // Roles
     FarmerRole farmers = new FarmerRole();
     DistributorRole distributors = new DistributorRole();
@@ -152,7 +154,7 @@ contract SupplyChain is Ownable {
 
     // Define modifiers for access control
     modifier onlyFarmer() {
-        require(farmers.isFarmer(msg.sender), "Message sender is not a farmer");
+        require(farmers.isFarmer(msg.sender), string(abi.encodePacked("Message sender ",toAsciiString(msg.sender), " is not a farmer")));
         _;
     }
 
@@ -190,27 +192,31 @@ contract SupplyChain is Ownable {
 
     // Add roles
     function addFarmer(address _farmerID) public 
-    onlyOwner()
+    onlyOwner() returns(address)
     {
         farmers.addFarmer(_farmerID);
+        return _farmerID;
     }
 
     function addDistributor(address _distributorID) public 
-    onlyOwner()
+    onlyOwner() returns(address)
     {
         distributors.addDistributor(_distributorID);
+        return _distributorID;
     }
 
     function addRetailer(address _retailerID) public 
-    onlyOwner()
+    onlyOwner() returns(address)
     {
         retailers.addRetailer(_retailerID);
+        return _retailerID;
     }
 
     function addConsumer(address _consumerID) public 
-    onlyOwner()
+    onlyOwner() returns(address)
     {
         consumers.addConsumer(_consumerID);
+        return _consumerID;
     }
 
     // Define a function 'harvestItem' that allows a farmer to mark an item 'Harvested'
@@ -323,13 +329,13 @@ contract SupplyChain is Ownable {
         // Update the appropriate fields - ownerID, distributorID, itemState
         items[_upc].ownerID = msg.sender;
         items[_upc].distributorID = msg.sender;
-        items[_upc].itemState = State.Purchased;
+        items[_upc].itemState = State.Sold;
 
         // Transfer money to farmer
         items[_upc].originFarmerID.transfer(items[_upc].productPrice);
 
         // emit the appropriate event
-        emit Purchased(_upc);
+        emit Sold(_upc);
     }
 
     // Define a function 'shipItem' that allows the distributor to mark an item 'Shipped'
@@ -337,7 +343,7 @@ contract SupplyChain is Ownable {
     function shipItem(uint256 _upc)
         public
     // Call modifier to check if upc has passed previous supply chain stage
-        purchased(_upc)
+        sold(_upc)
     // Call modifier to verify caller of this function
         verifyCaller(items[_upc].distributorID)
     // Verify caller is a distributor
@@ -447,6 +453,21 @@ contract SupplyChain is Ownable {
             item.consumerID
         );
     }
+function toAsciiString(address x) internal pure returns (string memory) {
+    bytes memory s = new bytes(40);
+    for (uint i = 0; i < 20; i++) {
+        bytes1 b = bytes1(uint8(uint(uint160(x)) / (2**(8*(19 - i)))));
+        bytes1 hi = bytes1(uint8(b) / 16);
+        bytes1 lo = bytes1(uint8(b) - 16 * uint8(hi));
+        s[2*i] = char(hi);
+        s[2*i+1] = char(lo);            
+    }
+    return string(s);
+}
 
+function char(bytes1 b) internal pure returns (bytes1 c) {
+    if (uint8(b) < 10) return bytes1(uint8(b) + 0x30);
+    else return bytes1(uint8(b) + 0x57);
+}
 
 }
