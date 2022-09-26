@@ -312,7 +312,8 @@ App = {
           return instance.fetchItemBufferOne(App.upc);
         }).then(function(result) {
           $("#ftc-item").text(result);
-          console.log("Current owner is ", result[2]);
+          document.getElementById("sku").value = result[0];
+          document.getElementById("upc").value = result[1];
           document.getElementById("ownerID").value = result[2];
           console.log('fetchItemBufferOne', result);
         }).catch(function(err) {
@@ -326,6 +327,9 @@ App = {
           return instance.fetchItemBufferTwo.call(App.upc);
         }).then(function(result) {
           $("#ftc-item").text(result);
+          document.getElementById("sku").value = result[0];
+          document.getElementById("upc").value = result[1];
+          document.getElementById("productID").value = result[2];
           console.log('fetchItemBufferTwo', result);
         }).catch(function(err) {
           console.log(err.message);
